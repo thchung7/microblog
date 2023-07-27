@@ -39,7 +39,7 @@ def create_app(config_class=Config):
         if app.config["OPENSEARCH_URL"]
         else None
     )
-    print(app.opensearch.ping(), flush=True)
+    # print(app.opensearch.ping(), flush=True)
     from app.errors import bp as errors_bp
 
     app.register_blueprint(errors_bp)

@@ -120,7 +120,12 @@ def edit_profile(username):
         if filename:
             if current_user.uploaded_picture:
                 print(current_user.uploaded_picture)
-                filepath = os.path.join(current_app.root_path, "static", "profile_pictures", current_user.uploaded_picture)
+                filepath = os.path.join(
+                    current_app.root_path,
+                    "static",
+                    "profile_pictures",
+                    current_user.uploaded_picture,
+                )
                 os.remove(filepath)
             if "gravatar" in filename:  # change to if user chose default option
                 filename = "user" + str(current_user.id) + ".png"
@@ -181,8 +186,12 @@ def followers(username):
         if user.followed_by(u):
             followers.append(u)
     print("followers: ", followers)
-    next_url = url_for("main.followers", page=posts.next_num) if posts.has_next else None
-    prev_url = url_for("main.followers", page=posts.prev_num) if posts.has_prev else None
+    next_url = (
+        url_for("main.followers", page=posts.next_num) if posts.has_next else None
+    )
+    prev_url = (
+        url_for("main.followers", page=posts.prev_num) if posts.has_prev else None
+    )
     return render_template(
         "followers.html",
         title=_("Followers"),
@@ -206,8 +215,12 @@ def following(username):
         if user.is_following(u):
             followings.append(u)
     print("followings: ", followings)
-    next_url = url_for("main.following", page=posts.next_num) if posts.has_next else None
-    prev_url = url_for("main.following", page=posts.prev_num) if posts.has_prev else None
+    next_url = (
+        url_for("main.following", page=posts.next_num) if posts.has_next else None
+    )
+    prev_url = (
+        url_for("main.following", page=posts.prev_num) if posts.has_prev else None
+    )
     return render_template(
         "following.html",
         title=_("Followers"),
@@ -256,21 +269,22 @@ def unfollow(username):
         return redirect(url_for("main.user", username=username))
     else:
         return redirect(url_for("main.index"))
-    
 
-@bp.route('/like/<int:post_id>/<action>')
+
+@bp.route("/like/<int:post_id>/<action>")
 @login_required
 def like(post_id, action):
     post = Post.query.filter_by(id=post_id).first_or_404()
-    if action == 'like':
+    if action == "like":
         current_user.like_post(post)
         db.session.commit()
-    if action == 'unlike':
+    if action == "unlike":
         current_user.unlike_post(post)
         db.session.commit()
-    return redirect(request.referrer) # contains URL the request came from
+    return redirect(request.referrer)  # contains URL the request came from
 
-@bp.route('/delete_post/<int:user_id>/<int:post_id>')
+
+@bp.route("/delete_post/<int:user_id>/<int:post_id>")
 @login_required
 def delete_post(user_id, post_id):
     post = Post.query.filter_by(id=post_id).first_or_404()
@@ -280,7 +294,7 @@ def delete_post(user_id, post_id):
             return redirect(request.referrer)
         except Exception as e:
             print(e, flush=True)
-            flash('An error occurred, try again later.')
+            flash("An error occurred, try again later.")
             return redirect(request.referrer)
     else:
         flash("You cannot delete somebody else's post!")
@@ -337,25 +351,27 @@ def user_popup(username):
     return render_template("user_popup.html", user=user, form=form)
 
 
-@bp.route("/send_message/<recipient>", methods=["GET", "POST"])
+# TODO: send_message route has to direct to the dm conversation page
+@bp.route("/send_message/<username>", methods=["GET", "POST"])
 @login_required
-def send_message(recipient):
-    user = User.query.filter_by(username=recipient).first_or_404()
+def send_message(username):
+    user = User.query.filter_by(username=username).first_or_404()
     form = MessageForm()
     if form.validate_on_submit():
-        msg = Message(author=current_user, recipient=user, body=form.message.data)
+        msg = Message(author=current_user, username=user, body=form.message.data)
         db.session.add(msg)
         user.add_notification("unread_message_count", user.new_messages())
         db.session.commit()
         flash(_("Your message has been sent."))
-        return redirect(url_for("main.user", username=recipient))
+        return redirect(url_for("main.user", username=username))
     return render_template(
-        "send_message.html", title=_("Send Message"), form=form, recipient=recipient
+        "send_message.html", title=_("Send Message"), form=form, username=username
     )
 
 
 @bp.route("/messages")
 @login_required
+# TODO: change to show conversations, not messages
 def messages():
     current_user.last_message_read_time = datetime.utcnow()
     current_user.add_notification("unread_message_count", 0)
@@ -374,6 +390,38 @@ def messages():
     )
     return render_template(
         "messages.html", messages=messages.items, next_url=next_url, prev_url=prev_url
+    )
+
+
+@bp.route("/messages/<username>")
+@login_required
+def messages_with(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    page = request.args.get("page", 1, type=int)
+    messages = (
+        current_user.messages_with(user)
+        .order_by(Message.timestamp.desc())
+        .paginate(
+            page=page, per_page=current_app.config["POSTS_PER_PAGE"], error_out=False
+        )
+    )
+    # TODO: use scroll, not pagination
+    # next_url = (
+    #     url_for("main.messages_with", username=username, page=messages.next_num)
+    #     if messages.has_next
+    #     else None
+    # )
+    # prev_url = (
+    #     url_for("main.messages_with", username=username, page=messages.prev_num)
+    #     if messages.has_prev
+    #     else None
+    # )
+    return render_template(
+        "messages_with.html",
+        messages=messages.items,
+        # next_url=next_url,
+        # prev_url=prev_url,
+        username=username,
     )
 
 
