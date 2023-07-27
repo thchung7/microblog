@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+<h1>{{ user.username }}{{ _( '&#39;s followers') }}</h1>
+<table class="table table-hover">
+    <tr>
+      <td width="70px">
+        {% for follower in followers %}
+            <span class="user_popup">
+                <a href="{{ url_for('main.user', username=follower.username) }}">
+                    <img style="width: 5%; padding-right: 1%;" src="{{ follower.avatar }}">
+                    {{ follower.username }}
+                </a>
+            </span>
+            <br><br>
+        {% endfor %}
+      </td>
+    </tr>
+</table>
+{% endblock %}

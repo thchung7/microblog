@@ -1,0 +1,33 @@
+{#
+{% extends "base.html" %}
+
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#deleteModal">Delete account</button>
+
+{% block modal %}
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Delete account?</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete your account? This action cannot be undone.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-dismiss="modal">Delete forever</button>
+          <button type="button" class="btn btn-primary">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+<script>
+$('#deleteModal').modal('show')
+</script>
+{% endblock %}
+#}
