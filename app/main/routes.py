@@ -351,6 +351,7 @@ def user_popup(username):
     return render_template("user_popup.html", user=user, form=form)
 
 
+# TODO: send_message route has to direct to the dm conversation page
 @bp.route("/send_message/<username>", methods=["GET", "POST"])
 @login_required
 def send_message(username):
@@ -404,21 +405,22 @@ def messages_with(username):
             page=page, per_page=current_app.config["POSTS_PER_PAGE"], error_out=False
         )
     )
-    next_url = (
-        url_for("main.messages_with", username=username, page=messages.next_num)
-        if messages.has_next
-        else None
-    )
-    prev_url = (
-        url_for("main.messages_with", username=username, page=messages.prev_num)
-        if messages.has_prev
-        else None
-    )
+    # TODO: use scroll, not pagination
+    # next_url = (
+    #     url_for("main.messages_with", username=username, page=messages.next_num)
+    #     if messages.has_next
+    #     else None
+    # )
+    # prev_url = (
+    #     url_for("main.messages_with", username=username, page=messages.prev_num)
+    #     if messages.has_prev
+    #     else None
+    # )
     return render_template(
         "messages_with.html",
         messages=messages.items,
-        next_url=next_url,
-        prev_url=prev_url,
+        # next_url=next_url,
+        # prev_url=prev_url,
         username=username,
     )
 
