@@ -303,6 +303,7 @@ class Message(db.Model):
     recipient_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     body = db.Column(db.String(140))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    # likes = db.relationship("PostLike", backref='post', lazy='dynamic')
 
     def __repr__(self):
         return "<Message {}>".format(self.body)
